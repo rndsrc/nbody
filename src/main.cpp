@@ -56,8 +56,8 @@ main(int argc, char *argv[])
  	//==============================================================
 	// INSTANTIZATION
 
-	int n = argc <= 1 ? 256 : atoi(argv[1]); // number of particles
-	int t = argc <= 2 ? 32  : atoi(argv[2]); // number of outer time loop
+	int n = argc <= 1 ? 128 : atoi(argv[1]); // number of particles
+	int t = argc <= 2 ? 128 : atoi(argv[2]); // number of outer time loop
 	int s = argc <= 2 ? 128 : atoi(argv[2]); // number of inner time loop
 	(void)printf("Configurations:\t%d-body with %d x %d steps\n", n, t, s);
 
@@ -96,8 +96,8 @@ main(int argc, char *argv[])
 	//==============================================================
 	// MAIN LOOP
 
-	const real dt  = 1.0 / (s*t); // time step
-	const real dt2 = 0.5 * dt;    // half time step
+	const real dt  = pow(n, -2.0/d) / 1024; // time step
+	const real dt2 = 0.5 * dt;              // half time step
 
 	for(int i = 0; i < t; ++i) {
 		(void)printf("%6d:\t", i);
