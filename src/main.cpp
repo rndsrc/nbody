@@ -37,10 +37,13 @@ main(int argc, char *argv[])
  	//==============================================================
 	// SETUP
 
-	int n = argc <= 1 ? 1024 : atoi(argv[1]);
+	const int o = 2; // order of ODEs
+	const int d = 3; // spacial dimensions
+
+	int n = argc <= 1 ? 256 : atoi(argv[1]);
 	(void)printf("%d bodys will be used\n", n);
 
-	int N = argc <= 2 ? 32   : atoi(argv[2]);
+	int N = argc <= 2 ? 32  : atoi(argv[2]);
 	(void)printf("%d steps will be used\n", N);
 
 	// Timesteps depend on each other, so make the queue inorder
@@ -53,7 +56,7 @@ main(int argc, char *argv[])
 	queue q(device_selector, dpc_common::exception_handler, properties);
 
 	// Allocate memory
-	real *states = malloc_shared<real>(6 * n, q);
+	real *states = malloc_shared<real>(o * d * n, q);
 
 	//==============================================================
 	// MAIN LOOP
