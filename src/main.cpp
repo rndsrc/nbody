@@ -25,6 +25,10 @@
 
 #include "dpc_common.hpp"
 
+// Shorthands for selecting position and velocity from states
+#define X(p, v) states[p * ps +  v    * vs]
+#define V(p, v) states[p * ps + (v+d) * vs]
+
 using namespace sycl;
 
 void
@@ -83,7 +87,11 @@ main(int argc, char *argv[])
 	//==============================================================
 	// MAIN LOOP
 
-	const real f = pow(2.0, 1.0/s);
+	const real dt  = 1.0 / (s*t); // time step
+	const real dt2 = 0.5 * dt;    // half time step
+
+	const int  ps  = 6; // particle stride; change to 1 for SoA
+	const int  vs  = 1; // value    stride; change to n for SoA
 
 	for(int i = 0; i < t; ++i) {
 		(void)printf("%6d:\t", i);
@@ -91,8 +99,24 @@ main(int argc, char *argv[])
 		// Submit the same kernel s times for the substeps
 		for(int j = 0; j < s; ++j)
 			q.submit([&](handler& h) {
-				h.parallel_for(range<1>(N), [=] (id<1> i) {
-					states[i] *= f;
+				h.parallel_for(range<1>(n), [=] (id<1> k) {
+					// Drift
+					#pragma unroll
+					for(int l = 0; l < d; ++l)
+						X(k,l) += dt2 * V(k,l);
+
+					// TODO: Compute direct gravitational force
+					real a[3] = {0.0, 0.0, 0.0};
+
+					// Kick
+					#pragma unroll
+					for(int l = 0; l < d; ++l)
+						V(k,l) += dt  * a[l];
+
+					// Drift
+					#pragma unroll
+					for(int l = 0; l < d; ++l)
+						X(k,l) += dt2 * V(k,l);
 				});
 			});
 
