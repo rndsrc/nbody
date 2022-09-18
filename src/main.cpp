@@ -39,7 +39,8 @@ main(int argc, char *argv[])
 
 	int n = argc <= 1 ? 256 : atoi(argv[1]); // number of particles
 	int t = argc <= 2 ? 32  : atoi(argv[2]); // number of outer time loop
-	(void)printf("Configurations:\t%d-body with %d steps\n", n, t);
+	int s = argc <= 2 ? 128 : atoi(argv[2]); // number of inner time loop
+	(void)printf("Configurations:\t%d-body with %d x %d steps\n", n, t, s);
 
 	// Timesteps depend on each other, so make the queue inorder
 	property_list properties{property::queue::in_order()};
