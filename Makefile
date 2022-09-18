@@ -1,6 +1,6 @@
-TARGET_EMU    = fpga_emu
-TARGET_HW     = fpga_hardware
-TARGET_REPORT = fpga_report.a
+TARGET_EMU    = nbody_fpgaemu
+TARGET_HW     = nbody_fpga
+TARGET_REPORT = nbody_report.a
 
 SRCS     = src/main.cpp
 OBJS     = $(SRCS:.cpp=.o)
@@ -13,7 +13,7 @@ CXXFLAGS = -std=c++17
 .DEFAULT_GOAL := build_emu
 
 
-# Intel-supported FPGA cards 
+# Intel-supported FPGA cards
 FPGA_DEVICE_A10 = intel_a10gx_pac:pac_a10
 FPGA_DEVICE_S10 = intel_s10sx_pac:pac_s10
 FPGA_DEVICE     = $(FPGA_DEVICE_A10)
@@ -29,19 +29,19 @@ build: build_emu
 build_emu: $(TARGET_EMU)
 
 $(TARGET_EMU): $(SRCS)
-	$(CXX) $(CXXFLAGS) $(EMULATOR_FLAGS) -o $@ $^ 
+	$(CXX) $(CXXFLAGS) $(EMULATOR_FLAGS) -o $@ $^
 
 # Generate FPGA optimization report (without compiling all the way to hardware)
 report: $(TARGET_REPORT)
 
 $(TARGET_REPORT): $(SRCS)
-	$(CXX) $(CXXFLAGS) $(REPORT_FLAGS) -o $@ $^ 
+	$(CXX) $(CXXFLAGS) $(REPORT_FLAGS) -o $@ $^
 
 # Build for FPGA hardware
 build_hw: $(TARGET_HW)
 
 $(TARGET_HW): $(SRCS)
-	$(CXX) $(CXXFLAGS) $(HARDWARE_FLAGS) -fintelfpga -o $@ $^ 
+	$(CXX) $(CXXFLAGS) $(HARDWARE_FLAGS) -fintelfpga -o $@ $^
 
 # Run on the FPGA emulator
 run: run_emu
