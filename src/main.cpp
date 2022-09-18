@@ -19,9 +19,21 @@
 #include <cstdio>
 #include <CL/sycl.hpp>
 
+#include "dpc_common.hpp"
+
 int
 main(int argc, char *argv[])
 {
-	(void)printf("nbody: simple SYCL tester\n");
+	(void)printf("nbody: simpmle SYCL tester\n");
+
+	dpc_common::TimeInterval timer;
+
+	for(int i = 0; i < 100; ++i) {
+		(void)printf("Step %d: ", i);
+
+		double elapsed = timer.Elapsed();
+		(void)printf("%.3g sec\n", elapsed);
+	}
+
 	return 0;
 }
