@@ -35,16 +35,14 @@ main(int argc, char *argv[])
 	dpc_common::TimeInterval timer;
 
  	//==============================================================
-	// SETUP
+	// INSTANTIZATION
 
 	const int o = 2; // order of ODEs
 	const int d = 3; // spacial dimensions
 
 	int n = argc <= 1 ? 256 : atoi(argv[1]);
-	(void)printf("%d bodys will be used\n", n);
-
 	int N = argc <= 2 ? 32  : atoi(argv[2]);
-	(void)printf("%d steps will be used\n", N);
+	(void)printf("Configurations:\t%d-body with %d steps\n", n, N);
 
 	// Timesteps depend on each other, so make the queue inorder
 	property_list properties{property::queue::in_order()};
@@ -58,11 +56,18 @@ main(int argc, char *argv[])
 	// Allocate memory
 	real *states = malloc_shared<real>(o * d * n, q);
 
+	(void)printf("Instantized:\t%.3g sec\n", timer.Elapsed());
+
+	//==============================================================
+	// INITIALIZATION
+
+	(void)printf("Initialized:\t%.3g sec\n", timer.Elapsed());
+
 	//==============================================================
 	// MAIN LOOP
 
 	for(int i = 0; i < N; ++i) {
-		(void)printf("Step %d: ", i);
+		(void)printf("%6d:\t", i);
 
 		double elapsed = timer.Elapsed();
 		(void)printf("%.3g sec\n", elapsed);
