@@ -27,6 +27,17 @@
 
 using namespace sycl;
 
+void
+output(int i, int N, real *s)
+{
+	char fname[256];
+	sprintf(fname, "%06d.raw", i);
+
+	FILE *file = fopen(fname, "wb");
+	fwrite(s, sizeof(real), N, file);
+	fclose(file);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -65,6 +76,7 @@ main(int argc, char *argv[])
 	// Fill positions and velocities with random values in [-1,1]
 	for(int i = 0; i < N; ++i)
 		states[i] = 2.0 * rand() / RAND_MAX - 1.0;
+	output(0, N, states);
 
 	(void)printf("Initialized:\t%.3g sec\n", timer.Elapsed());
 
@@ -85,8 +97,12 @@ main(int argc, char *argv[])
 			});
 
 		q.wait_and_throw();
-		double elapsed = timer.Elapsed();
-		(void)printf("%.3g sec\n", elapsed);
+		double ct = timer.Elapsed();
+
+		output(i+1, N, states);
+		double io = timer.Elapsed();
+
+		(void)printf("compute: %.3g sec; I/O: %.3g sec\n", ct, io);
 	}
 
  	//==============================================================
