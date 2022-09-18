@@ -16,26 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with nbody.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nbody.hpp"
+#ifndef _NBODY_HPP_
+#define _NBODY_HPP_
 
-#include <cstdio>
-#include <CL/sycl.hpp>
+using real = float;
 
-#include "dpc_common.hpp"
-
-int
-main(int argc, char *argv[])
-{
-	(void)printf("nbody: simpmle SYCL tester\n");
-
-	dpc_common::TimeInterval timer;
-
-	for(int i = 0; i < 100; ++i) {
-		(void)printf("Step %d: ", i);
-
-		double elapsed = timer.Elapsed();
-		(void)printf("%.3g sec\n", elapsed);
-	}
-
-	return 0;
-}
+#endif // _NBODY_HPP_
