@@ -20,8 +20,9 @@
 
 #include <cstdio>
 #include <CL/sycl.hpp>
-
 #include "dpc_common.hpp"
+
+using namespace sycl;
 
 int
 main(int argc, char *argv[])
@@ -30,12 +31,30 @@ main(int argc, char *argv[])
 
 	dpc_common::TimeInterval timer;
 
+ 	//==============================================================
+	// SETUP
+
+	// Timesteps depend on each other, so make the queue inorder
+	property_list properties{property::queue::in_order()};
+
+	// Define device selector as 'default'
+	default_selector device_selector;
+
+	// Create a device queue using DPC++ class queue
+	queue q(device_selector, dpc_common::exception_handler, properties);
+
+	//==============================================================
+	// MAIN LOOP
+
 	for(int i = 0; i < 100; ++i) {
 		(void)printf("Step %d: ", i);
 
 		double elapsed = timer.Elapsed();
 		(void)printf("%.3g sec\n", elapsed);
 	}
+
+ 	//==============================================================
+	// CLEAN UP
 
 	return 0;
 }
