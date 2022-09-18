@@ -19,7 +19,10 @@
 #include "nbody.hpp"
 
 #include <cstdio>
+#include <cstdlib>
+
 #include <CL/sycl.hpp>
+
 #include "dpc_common.hpp"
 
 using namespace sycl;
@@ -34,6 +37,9 @@ main(int argc, char *argv[])
  	//==============================================================
 	// SETUP
 
+	int n = argc <= 1 ? 1024 : atoi(argv[1]);
+	(void)printf("%d bodys will be used\n", n);
+
 	// Timesteps depend on each other, so make the queue inorder
 	property_list properties{property::queue::in_order()};
 
@@ -42,6 +48,9 @@ main(int argc, char *argv[])
 
 	// Create a device queue using DPC++ class queue
 	queue q(device_selector, dpc_common::exception_handler, properties);
+
+	// Allocate memory
+	real *states = malloc_shared<real>(6 * n, q);
 
 	//==============================================================
 	// MAIN LOOP
@@ -55,6 +64,8 @@ main(int argc, char *argv[])
 
  	//==============================================================
 	// CLEAN UP
+
+	free(states);
 
 	return 0;
 }
