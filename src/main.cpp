@@ -37,12 +37,9 @@ main(int argc, char *argv[])
  	//==============================================================
 	// INSTANTIZATION
 
-	const int o = 2; // order of ODEs
-	const int d = 3; // spacial dimensions
-
-	int n = argc <= 1 ? 256 : atoi(argv[1]);
-	int N = argc <= 2 ? 32  : atoi(argv[2]);
-	(void)printf("Configurations:\t%d-body with %d steps\n", n, N);
+	int n = argc <= 1 ? 256 : atoi(argv[1]); // number of particles
+	int t = argc <= 2 ? 32  : atoi(argv[2]); // number of outer time loop
+	(void)printf("Configurations:\t%d-body with %d steps\n", n, t);
 
 	// Timesteps depend on each other, so make the queue inorder
 	property_list properties{property::queue::in_order()};
@@ -54,7 +51,10 @@ main(int argc, char *argv[])
 	queue q(device_selector, dpc_common::exception_handler, properties);
 
 	// Allocate memory
-	real *states = malloc_shared<real>(o * d * n, q);
+	const int o = 2;         // order of ODEs
+	const int d = 3;         // spacial dimensions
+	const int N = o * d * n; // number of reals to describe the states
+	real *states = malloc_shared<real>(N, q);
 
 	(void)printf("Instantized:\t%.3g sec\n", timer.Elapsed());
 
@@ -62,7 +62,7 @@ main(int argc, char *argv[])
 	// INITIALIZATION
 
 	// Fill positions and velocities with random values in [-1,1]
-	for(int i = 0; i < o * d * n; ++i)
+	for(int i = 0; i < N; ++i)
 		states[i] = 2.0 * rand() / RAND_MAX - 1.0;
 
 	(void)printf("Initialized:\t%.3g sec\n", timer.Elapsed());
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 	//==============================================================
 	// MAIN LOOP
 
-	for(int i = 0; i < N; ++i) {
+	for(int i = 0; i < t; ++i) {
 		(void)printf("%6d:\t", i);
 
 		double elapsed = timer.Elapsed();
