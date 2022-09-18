@@ -25,6 +25,10 @@
 
 #include "dpc_common.hpp"
 
+// Constants
+const int o = 2; // order of ODEs
+const int d = 3; // spacial dimensions
+
 // Shorthands for selecting position and velocity from states
 #define X(p, v) states[p * ps +  v    * vs]
 #define V(p, v) states[p * ps + (v+d) * vs]
@@ -67,9 +71,9 @@ main(int argc, char *argv[])
 	queue q(device_selector, dpc_common::exception_handler, properties);
 
 	// Allocate memory
-	const int o = 2;         // order of ODEs
-	const int d = 3;         // spacial dimensions
-	const int N = o * d * n; // number of reals to describe the states
+	const int ps = o * d;     // particle stride; change to 1 for SoA
+	const int vs = 1;         // value    stride; change to n for SoA
+	const int N  = o * d * n; // number of reals to describe the states
 	real *states = malloc_shared<real>(N, q);
 
 	(void)printf("Instantized:\t%.3g sec\n", timer.Elapsed());
@@ -77,9 +81,14 @@ main(int argc, char *argv[])
 	//==============================================================
 	// INITIALIZATION
 
-	// Fill positions and velocities with random values in [-1,1]
-	for(int i = 0; i < N; ++i)
-		states[i] = 2.0 * rand() / RAND_MAX - 1.0;
+	// Fill positions with random values in [-1,1]
+	for(int i = 0; i < n; ++i) {
+		#pragma unroll
+		for(int j = 0; j < d; ++j) {
+			X(i,j) = 2.0 * rand() / RAND_MAX - 1.0;
+			V(i,j) = 0.0;
+		}
+	}
 	output(0, N, states);
 
 	(void)printf("Initialized:\t%.3g sec\n", timer.Elapsed());
@@ -89,9 +98,6 @@ main(int argc, char *argv[])
 
 	const real dt  = 1.0 / (s*t); // time step
 	const real dt2 = 0.5 * dt;    // half time step
-
-	const int  ps  = 6; // particle stride; change to 1 for SoA
-	const int  vs  = 1; // value    stride; change to n for SoA
 
 	for(int i = 0; i < t; ++i) {
 		(void)printf("%6d:\t", i);
