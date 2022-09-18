@@ -97,28 +97,50 @@ main(int argc, char *argv[])
 		(void)printf("%6d:\t", i);
 
 		// Submit the same kernel s times for the substeps
-		for(int j = 0; j < s; ++j)
+		for(int j = 0; j < s; ++j) {
+			// Drift
+			q.submit([&](handler& h) {
+				h.parallel_for(range<1>(n), [=] (id<1> k) {
+					#pragma unroll
+					for(int l = 0; l < d; ++l)
+						X(k,l) += dt2 * V(k,l);
+				});
+			});
+
+			// Kick
+			q.submit([&](handler& h) {
+				h.parallel_for(range<1>(n), [=] (id<1> k) {
+
+					// Compute direct gravitational force
+					real a[3] = {0.0, 0.0, 0.0};
+					for(int l = 0; l < n; ++l)
+						if(l != k) {
+							real dx = X(k,0) - X(l,0);
+							real dy = X(k,1) - X(l,1);
+							real dz = X(k,2) - X(l,2);
+							real rr = dx * dx + dy * dy + dz * dz;
+							real f  = -1.0 / (rr * sqrt(rr) + 1.0e-6);
+							a[0] += f * dx;
+							a[1] += f * dy;
+							a[2] += f * dz;
+						}
+
+					#pragma unroll
+					for(int l = 0; l < d; ++l)
+						V(k,l) += dt * a[l];
+				});
+			});
+
+			// Drift
 			q.submit([&](handler& h) {
 				h.parallel_for(range<1>(n), [=] (id<1> k) {
 					// Drift
 					#pragma unroll
 					for(int l = 0; l < d; ++l)
 						X(k,l) += dt2 * V(k,l);
-
-					// TODO: Compute direct gravitational force
-					real a[3] = {0.0, 0.0, 0.0};
-
-					// Kick
-					#pragma unroll
-					for(int l = 0; l < d; ++l)
-						V(k,l) += dt  * a[l];
-
-					// Drift
-					#pragma unroll
-					for(int l = 0; l < d; ++l)
-						X(k,l) += dt2 * V(k,l);
 				});
 			});
+		}
 
 		q.wait_and_throw();
 		double ct = timer.Elapsed();
