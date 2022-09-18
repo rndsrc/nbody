@@ -71,9 +71,20 @@ main(int argc, char *argv[])
 	//==============================================================
 	// MAIN LOOP
 
+	const real f = pow(2.0, 1.0/s);
+
 	for(int i = 0; i < t; ++i) {
 		(void)printf("%6d:\t", i);
 
+		// Submit the same kernel s times for the substeps
+		for(int j = 0; j < s; ++j)
+			q.submit([&](handler& h) {
+				h.parallel_for(range<1>(N), [=] (id<1> i) {
+					states[i] *= f;
+				});
+			});
+
+		q.wait_and_throw();
 		double elapsed = timer.Elapsed();
 		(void)printf("%.3g sec\n", elapsed);
 	}
