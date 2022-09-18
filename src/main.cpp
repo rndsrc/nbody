@@ -61,6 +61,10 @@ main(int argc, char *argv[])
 	//==============================================================
 	// INITIALIZATION
 
+	// Fill positions and velocities with random values in [-1,1]
+	for(int i = 0; i < o * d * n; ++i)
+		states[i] = 2.0 * rand() / RAND_MAX - 1.0;
+
 	(void)printf("Initialized:\t%.3g sec\n", timer.Elapsed());
 
 	//==============================================================
