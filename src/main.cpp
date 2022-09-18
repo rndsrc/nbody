@@ -40,6 +40,9 @@ main(int argc, char *argv[])
 	int n = argc <= 1 ? 1024 : atoi(argv[1]);
 	(void)printf("%d bodys will be used\n", n);
 
+	int N = argc <= 2 ? 32   : atoi(argv[2]);
+	(void)printf("%d steps will be used\n", N);
+
 	// Timesteps depend on each other, so make the queue inorder
 	property_list properties{property::queue::in_order()};
 
@@ -55,7 +58,7 @@ main(int argc, char *argv[])
 	//==============================================================
 	// MAIN LOOP
 
-	for(int i = 0; i < 100; ++i) {
+	for(int i = 0; i < N; ++i) {
 		(void)printf("Step %d: ", i);
 
 		double elapsed = timer.Elapsed();
