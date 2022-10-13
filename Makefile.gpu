@@ -1,4 +1,4 @@
-TARGET   = makefile-gpu
+TARGET   = nbody_gpu
 SRCS     = src/main.cpp
 
 CXX      = dpcpp
